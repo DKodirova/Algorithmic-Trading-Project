@@ -9,8 +9,6 @@ warnings.filterwarnings('ignore')
 
 
 def measure_memory_usage(func, n_values):
-    print("current n is:")
-    print(n_values)
     memory_usage_list = []
     for n in n_values:
         mem_usage = memory_usage((func, (n,)))
@@ -62,21 +60,24 @@ def plot_and_fit(n_values, memory_usage, time_usage, graph_name):
 
 def main():
     
+    n_values = list(range(10, 510, 10))
     
-    n_values = list(range(10, 210, 10))
-    
-    memory_usage_list = measure_memory_usage(sa_pairs_trading.strategy1, n_values)
     print("measuring memory usage for strat1")
-    time_usage_list = measure_time_complexity(sa_pairs_trading.strategy1, n_values)
+    memory_usage_list = measure_memory_usage(sa_pairs_trading.strategy1, n_values)
+    
     print("measuring time usage for strat1")
+    time_usage_list = measure_time_complexity(sa_pairs_trading.strategy1, n_values)
+    
     plot_and_fit(n_values, memory_usage_list, time_usage_list, "images/complexity_strat1")
         
-    n_values = [1,2,3,4,5,6,7,8,9,10]
+    n_values = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7.5, 8, 8.5, 9, 9.5, 10]
 
     print("measuring memory usage for strat2")
     memory_usage_list  = measure_memory_usage(lstm.strategy2, n_values)
+    
     print("measuring time usage for strat2")
     time_usage_list = measure_time_complexity(lstm.strategy2, n_values)
+    
     plot_and_fit(n_values, memory_usage_list, time_usage_list, "images/complexity_strat2")
 
 if __name__ == "__main__":

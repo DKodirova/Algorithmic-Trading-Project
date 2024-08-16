@@ -1,14 +1,12 @@
 import yfinance as yf
-from yahoo_fin import stock_info
 import pandas as pd
-import random
 from sklearn.model_selection import train_test_split
-import seaborn as sns
 import statsmodels.api as sm
 import numpy as np
 idx = pd.IndexSlice
 
 def strategy1(n):
+    print("current n is:", n)
     prices = pd.read_csv("data/prices.csv")
     count = pd.DataFrame(prices['Ticker'].value_counts()).reset_index()
     symbols = count[count['count'] >= 2520]['Ticker'].tolist()[:n]
@@ -33,17 +31,14 @@ def strategy1(n):
     
     model = sm.OLS(train.asset2, train.asset1).fit()
     
-    # calculate z-score
     def zscore(series):
         return (series - series.mean()) / np.std(series)
     
-    # create a dataframe for trading signals
     signals = pd.DataFrame()
     signals['asset1'] = test_close[asset1] 
     signals['asset2'] = test_close[asset2]
     ratios = signals.asset1 / signals.asset2
     
-    # calculate z-score and define upper and lower thresholds
     signals['z'] = zscore(ratios)
     signals['z upper limit'] = np.mean(signals['z']) + np.std(signals['z'])
     signals['z lower limit'] = np.mean(signals['z']) - np.std(signals['z'])
@@ -51,33 +46,9 @@ def strategy1(n):
     signals['signals1'] = 0
     signals['signals1'] = np.select([signals['z'] > signals['z upper limit'], signals['z'] < signals['z lower limit']], [-1, 1], default=0)
     
-    # we take the first order difference to obtain portfolio position in that stock
     signals['positions1'] = signals['signals1'].diff()
     signals['signals2'] = -signals['signals1']
     signals['positions2'] = signals['signals2'].diff()
 
-
 if __name__ == "__main__":
-    data = pd.read_csv("data/nasdaq_screener.csv")
-    #print(data['Industry'].value_counts() )
-    symbols = data[data['Industry'] == 'Biotechnology: Pharmaceutical Preparations']['Symbol'].tolist()
-    #print(tickers)
-    price_list = []
-    
-    for symbol in symbols:
-        try:
-            price_temp = yf.download(symbol, period="max")
-            price_temp['Ticker'] = symbol  # Add the ticker as a column
-            price_list.append(price_temp)
-        except:
-            print(symbol)
-            
-    prices = pd.concat(price_list)
-    #grouped = prices.groupby('Ticker')
-    prices.to_csv("data/prices.csv")
-            
-    #industries = pd.DataFrame(data['Industry'].value_counts()).reset_index()
-    #print(industries['count'].unique())
-    #print(industries)
-    #strategy1()
-    
+    strategy1(10)

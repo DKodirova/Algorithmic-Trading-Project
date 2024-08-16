@@ -9,20 +9,19 @@ from sklearn.preprocessing import MinMaxScaler
 from keras.layers import LSTM # type: ignore
 from keras.layers import Dense # type: ignore
 from keras.models import Sequential # type: ignore
-import matplotlib.pyplot as mtlplt
-from matplotlib import rcParams 
+
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 
 def strategy2(n):
-    print("N IS WHAT????", n)
-    print("shotaman")
-    
+    print("current n is:", n)
     data_frame = pd.read_csv('data/AAPL-3.csv')
     data_frame['Date'] = pd.to_datetime(data_frame['Date'])
     
     latest_date = data_frame['Date'].max()
     start_date = latest_date - pd.DateOffset(months=int(n * 12))
     data_frame = data_frame[data_frame['Date'] >= start_date]
-    print("shotaman 1")
     
     stock_close_data = data_frame.filter(['Close'])
     stock_close_dataset = stock_close_data.values
@@ -47,7 +46,6 @@ def strategy2(n):
 
     neurons = 50
 
-    print("shotaman 2")
     model.add(LSTM(neurons, return_sequences=True, input_shape= (Xtrain.shape[1], 1))) 
 
     model.add(LSTM(neurons, return_sequences= False)) 
@@ -65,14 +63,10 @@ def strategy2(n):
     for i in range(60, len(testingData)):
         Xtest.append(testingData[i-60:i, 0])
         
-    print("shotaman 3")
-        
     Xtest = np.array(Xtest)
     Xtest = np.reshape(Xtest, (Xtest.shape[0], Xtest.shape[1], 1 ))
     predictions = model.predict(Xtest)
     predictions = scaler.inverse_transform(predictions)
-    
-    return predictions
 
 if __name__ == "__main__":
     strategy2(0.5)
